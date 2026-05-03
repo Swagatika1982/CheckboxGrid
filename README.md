@@ -1,157 +1,149 @@
-CheckboxGrid
+CheckboxGrid — Real-Time Distributed Checkbox System
 
-Real-time Distributed Checkbox Synchronization using Socket.IO & Redis
+Inspired by the viral “One Million Checkboxes,” this project is rebuilt as a scalable, real-time system demonstrating backend engineering and system design concepts.
 
-🌌 Overview
+Project Overview
 
-CheckboxGrid is a real-time, distributed system that keeps a grid of checkboxes perfectly synchronized across multiple users and multiple servers.
+CheckboxGrid is a real-time web application where multiple users can interact with a shared grid of checkboxes. Any change made by one user is instantly reflected for all connected users.
 
-Inspired by the concept of “1 Million Checkboxes”, this project goes beyond a simple UI—it demonstrates how modern systems handle real-time state sharing, horizontal scaling, and event-driven communication.
+This project focuses less on UI and more on how systems behave under real-time interaction, concurrency, and distributed environments.
 
-✨ Key Features
-⚡ Real-time updates across all connected clients
-🔄 Multi-server synchronization using Redis Pub/Sub
-🌐 Horizontally scalable architecture
-🧠 Centralized state management using Redis
-🔌 WebSocket-based communication via Socket.IO
-📦 Clean separation of frontend, backend, and messaging layers
-🧱 Architecture
-          ┌───────────────┐
-          │   Browser     │
-          │ (Client UI)   │
-          └──────┬────────┘
-                 │ WebSocket (Socket.IO)
-        ┌────────▼────────┐
-        │   Node Server   │ (Port 8000)
-        └────────┬────────┘
-                 │
-         Redis Pub/Sub + Storage
-                 │
-        ┌────────▼────────┐
-        │   Node Server   │ (Port 9000)
-        └────────┬────────┘
-                 │
-          ┌──────▼────────┐
-          │   Browser     │
-          └───────────────┘
-How It Works
+Tech Stack
 
-A user clicks a checkbox
-Client emits event → server (client:checkbox:change)
-Server:
-Updates state in Redis
-Publishes event via Redis Pub/Sub
-Other servers receive event
-All clients get updated instantly via Socket.IO
-🛠️ Tech Stack
-Node.js – backend runtime
-Express.js – HTTP server
-Socket.IO – real-time communication
-Redis / Valkey – state storage + Pub/Sub messaging
-Docker (optional) – containerized setup
-📂 Project Structure
-CheckboxGrid/
-│
-├── public/              # Frontend (HTML, CSS, JS)
-├── index.js             # Main server (Express + Socket.IO)
-├── redis-connection.js  # Redis clients (pub/sub + storage)
-├── docker-compose.yml   # Redis/Valkey setup
-├── package.json
-└── README.md
-🚀 Getting Started
-1. Clone the repository
-git clone https://github.com/your-username/CheckboxGrid.git
+Frontend
+
+HTML, CSS, JavaScript
+WebSocket client (Socket.IO)
+
+Backend
+
+Node.js
+Express
+Socket.IO
+
+Database
+
+MongoDB (user authentication)
+
+Caching / Messaging
+
+Redis (Valkey)
+Shared state
+Pub/Sub communication
+
+DevOps
+
+Docker (MongoDB + Redis)
+PM2 (process management)
+VPS deployment (Linux)
+Features Implemented
+Real-time checkbox updates across all users
+JWT-based authentication system
+Anonymous users (read-only access)
+Authenticated users can interact
+Per-user rate limiting to prevent spam
+Redis-based shared state management
+Pub/Sub system for multi-instance scalability
+Clean modular backend structure
+How to Run Locally
+Clone the repository:
+git clone https://github.com/YOUR_USERNAME/CheckboxGrid.git
 cd CheckboxGrid
-2. Install dependencies
+Install dependencies:
 npm install
-3. Start Redis (Docker)
+Create .env file:
+PORT=8000
+MONGO_URI=mongodb://admin:password@127.0.0.1:27017/checkboxgrid?authSource=admin
+REDIS_URL=redis://127.0.0.1:6379
+CLIENT_URL=http://localhost:8000
+JWT_ACCESS_SECRET=your_secret
+JWT_REFRESH_SECRET=your_secret
+Start services:
 docker compose up -d
-4. Run the server
+Run server:
 node index.js
-
-Or run multiple servers:
-
-PORT=8000 node index.js
-PORT=9000 node index.js
-5. Open in browser
+Open browser:
 http://localhost:8000
-http://localhost:9000
+Environment Variables Required
+PORT=8000
+MONGO_URI=your_mongodb_connection_string
+REDIS_URL=your_redis_connection_string
+CLIENT_URL=http://localhost:8000
+JWT_ACCESS_SECRET=secret
+JWT_REFRESH_SECRET=secret
+Redis Setup Instructions
 
-👉 Try clicking checkboxes in both tabs — they stay in sync 🔥
+Redis is used for two purposes:
 
-📡 API Endpoints
-Health Check
-GET /health
+Storing shared checkbox state
+Broadcasting updates across server instances
 
-Response:
+Run using Docker:
 
-{ "healthy": true }
-Get Checkbox State
-GET /checkboxes
+docker compose up -d
 
-Response:
+Ensure Redis is running:
 
-{
-  "checkboxes": [true, false, ...]
-}
-⚠️ Challenges Solved
-1. ❌ Local State Problem
+docker ps
 
-Each server had its own memory → inconsistent UI
-✅ Solved using Redis as shared state
+Default connection:
 
-2. ❌ Pub/Sub is not storage
+redis://127.0.0.1:6379
+Authentication Flow
+User registers with email and password
+User logs in and receives a JWT access token
+Token is stored in browser (localStorage)
+WebSocket connection sends token to server
+Server verifies token and attaches user to socket
 
-Redis Pub/Sub only broadcasts events
-✅ Added Redis key-value storage for persistence
+Behavior:
 
-3. ❌ Async bugs ([object Promise])
+Not logged in → read-only
+Logged in → allowed to interact
+WebSocket Flow
+Client connects using Socket.IO
+Server establishes persistent connection
+User triggers checkbox update
+Server processes event
+Update is published to Redis
+All clients receive update instantly
 
-Forgetting await caused JSON parsing errors
-✅ Proper async handling implemented
+This enables real-time synchronization across users.
 
-4. ❌ Multi-server inconsistency
+Rate Limiting Logic
 
-Different ports not syncing
-✅ Redis Pub/Sub ensures event propagation
+Rate limiting is implemented per user:
 
-📈 Scaling Strategy
+Each user has a unique key in Redis
+On every action, system checks last action timestamp
+If action is too frequent → request blocked
+Redis TTL ensures automatic reset
 
-This system is designed to scale horizontally:
+Example behavior:
 
-Add more Node servers behind a load balancer
-Use Redis as central state + messaging layer
-Maintain stateless servers
-🔐 Future Improvements
-🚦 Rate limiting using Redis
-🔒 Authentication & user sessions
-📊 Metrics & monitoring
-🧵 Conflict resolution (race conditions)
-☁️ Deploy to cloud (AWS / GCP / Vercel)
-🎯 Why This Project Matters
+User clicks too fast → blocked temporarily
+User waits → allowed again
 
-This project demonstrates real-world backend engineering concepts:
+This prevents abuse without affecting normal usage.
 
-Event-driven architecture
-Distributed systems thinking
-Real-time data synchronization
-State consistency across nodes
+Screenshots / Demo
 
-👉 These are core skills for modern backend & full-stack roles
+Live Demo:
 
-🙌 Acknowledgements
+http://YOUR_SERVER_IP:8000
 
-Inspired by the concept of “1 Million Checkboxes”
-Built as a learning and system design exploration project
+(Optional: Add screenshots here later)
 
-⭐ Show Your Support
+What This Project Demonstrates
+Real-time system design
+Distributed state handling
+Backend architecture thinking
+Event-driven communication
+Practical use of Redis and WebSockets
+Author
 
-If you found this project useful:
+Swagatika Sahoo
 
-⭐ Star the repo
-🍴 Fork it
-🧠 Use it to learn system design
-👤 Author
+Final Note
 
-S. Sahoo
-Software Developer | System Design Learner | Builder
+This project is intentionally designed to reflect how real-world systems behave, not just how they look.
