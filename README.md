@@ -10,103 +10,105 @@ This project focuses less on UI and more on how systems behave under real-time i
 
 Tech Stack
 
-Frontend
+  Frontend:  
+    HTML, CSS, JavaScript
+    WebSocket client (Socket.IO)
 
-HTML, CSS, JavaScript
-WebSocket client (Socket.IO)
+  Backend:
+    Node.js
+    Express
+    Socket.IO
 
-Backend
+  Database:
+    MongoDB (user authentication)
 
-Node.js
-Express
-Socket.IO
+  Caching / Messaging:  
+    Redis (Valkey)
+    Shared state
+    Pub/Sub communication
 
-Database
+DevOps:
+  Docker (MongoDB + Redis)
+  PM2 (process management)
+  VPS deployment (Linux)
 
-MongoDB (user authentication)
+Features Implemented:
+  Real-time checkbox updates across all users
+  JWT-based authentication system
+  Anonymous users (read-only access)
+  Authenticated users can interact
+  Per-user rate limiting to prevent spam
+  Redis-based shared state management
+  Pub/Sub system for multi-instance scalability
+  Clean modular backend structure
+  
+How to Run Locally:
 
-Caching / Messaging
-
-Redis (Valkey)
-Shared state
-Pub/Sub communication
-
-DevOps
-
-Docker (MongoDB + Redis)
-PM2 (process management)
-VPS deployment (Linux)
-Features Implemented
-Real-time checkbox updates across all users
-JWT-based authentication system
-Anonymous users (read-only access)
-Authenticated users can interact
-Per-user rate limiting to prevent spam
-Redis-based shared state management
-Pub/Sub system for multi-instance scalability
-Clean modular backend structure
-How to Run Locally
 Clone the repository:
-git clone https://github.com/YOUR_USERNAME/CheckboxGrid.git
-cd CheckboxGrid
+  git clone https://github.com/YOUR_USERNAME/CheckboxGrid.git
+  cd CheckboxGrid
+  
 Install dependencies:
-npm install
+  npm install
+
 Create .env file:
-PORT=8000
-MONGO_URI=mongodb://admin:password@127.0.0.1:27017/checkboxgrid?authSource=admin
-REDIS_URL=redis://127.0.0.1:6379
-CLIENT_URL=http://localhost:8000
-JWT_ACCESS_SECRET=your_secret
-JWT_REFRESH_SECRET=your_secret
+  PORT=8000
+  MONGO_URI=mongodb://admin:password@127.0.0.1:27017/checkboxgrid?authSource=admin
+  REDIS_URL=redis://127.0.0.1:6379
+  CLIENT_URL=http://localhost:8000
+  JWT_ACCESS_SECRET=your_secret
+  JWT_REFRESH_SECRET=your_secret
+
 Start services:
-docker compose up -d
+  docker compose up -d
+
 Run server:
-node index.js
+  node index.js
+
 Open browser:
-http://localhost:8000
+  http://localhost:8000
+
 Environment Variables Required
-PORT=8000
-MONGO_URI=your_mongodb_connection_string
-REDIS_URL=your_redis_connection_string
-CLIENT_URL=http://localhost:8000
-JWT_ACCESS_SECRET=secret
-JWT_REFRESH_SECRET=secret
+  PORT=8000
+  MONGO_URI=your_mongodb_connection_string
+  REDIS_URL=your_redis_connection_string
+  CLIENT_URL=http://localhost:8000
+  JWT_ACCESS_SECRET=secret
+  JWT_REFRESH_SECRET=secret
+
 Redis Setup Instructions
 
 Redis is used for two purposes:
-
-Storing shared checkbox state
-Broadcasting updates across server instances
+  Storing shared checkbox state
+  Broadcasting updates across server instances
 
 Run using Docker:
-
-docker compose up -d
+  docker compose up -d
 
 Ensure Redis is running:
-
-docker ps
+  docker ps
 
 Default connection:
+  redis://127.0.0.1:6379
 
-redis://127.0.0.1:6379
 Authentication Flow
-User registers with email and password
-User logs in and receives a JWT access token
-Token is stored in browser (localStorage)
-WebSocket connection sends token to server
-Server verifies token and attaches user to socket
+  User registers with email and password
+  User logs in and receives a JWT access token
+  Token is stored in browser (localStorage)
+  WebSocket connection sends token to server
+  Server verifies token and attaches user to socket
 
 Behavior:
-
 Not logged in → read-only
 Logged in → allowed to interact
-WebSocket Flow
-Client connects using Socket.IO
-Server establishes persistent connection
-User triggers checkbox update
-Server processes event
-Update is published to Redis
-All clients receive update instantly
+
+WebSocket Flow:
+  Client connects using Socket.IO
+  Server establishes persistent connection
+  User triggers checkbox update
+  Server processes event
+  Update is published to Redis
+  All clients receive update instantly
 
 This enables real-time synchronization across users.
 
@@ -114,19 +116,21 @@ Rate Limiting Logic
 
 Rate limiting is implemented per user:
 
-Each user has a unique key in Redis
-On every action, system checks last action timestamp
-If action is too frequent → request blocked
-Redis TTL ensures automatic reset
+  Each user has a unique key in Redis
+  On every action, system checks last action timestamp
+  If action is too frequent → request blocked
+  Redis TTL ensures automatic reset
 
 Example behavior:
 
-User clicks too fast → blocked temporarily
-User waits → allowed again
+  User clicks too fast → blocked temporarily
+  User waits → allowed again
 
 This prevents abuse without affecting normal usage.
 
 Screenshots / Demo
+ <img width="1050" height="904" alt="image" src="https://github.com/user-attachments/assets/a115e4f8-42f3-4f41-b4fd-6542cee4681b" />
+
 
 Live Demo:
 
