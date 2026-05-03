@@ -145,10 +145,21 @@ Screenshots / Demo
 
 Live Demo:
 
+Then test the full app from browser:
 http://74.208.206.245:8000
 
+Use:
+Email: test2@example.com
+Password: Password1
  
-
+After login:
+1. Page reloads
+2. Token saves in localStorage
+3. Socket reconnects with token
+4. Checkbox clicks should work
+5. Fast clicks should show rate-limit message
+6. Logout: Click to select does not allow, view only.
+   
 What This Project Demonstrates:
   Real-time system design
   Distributed state handling
