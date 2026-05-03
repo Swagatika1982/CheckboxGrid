@@ -144,20 +144,19 @@ Screenshots / Demo
 
 Live Demo:
 
-http://YOUR_SERVER_IP:8000
+http://74.208.206.245:8000
 
-(Optional: Add screenshots here later)
+ 
 
-What This Project Demonstrates
-Real-time system design
-Distributed state handling
-Backend architecture thinking
-Event-driven communication
-Practical use of Redis and WebSockets
-Author
-
+What This Project Demonstrates:
+  Real-time system design
+  Distributed state handling
+  Backend architecture thinking
+  Event-driven communication
+  Practical use of Redis and WebSockets
+  
+Author:
 Swagatika Sahoo
 
-Final Note
-
+Final Note:
 This project is intentionally designed to reflect how real-world systems behave, not just how they look.
