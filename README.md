@@ -44,9 +44,11 @@ Features Implemented:
   
 How to Run Locally:
 
-Clone the repository:
-  git clone https://github.com/YOUR_USERNAME/CheckboxGrid.git
-  cd CheckboxGrid
+## Clone the Repository
+
+```bash
+git clone https://github.com/Swagatika1982/CheckboxGrid.git
+cd CheckboxGrid
   
 Install dependencies:
   npm install
