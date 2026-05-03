@@ -45,8 +45,7 @@ Features Implemented:
 How to Run Locally:
 
 ## Clone the Repository
-
-```bash
+ 
 git clone https://github.com/Swagatika1982/CheckboxGrid.git
 cd CheckboxGrid
   
