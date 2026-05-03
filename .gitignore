@@ -1,24 +1,4 @@
-# -----------------------------
-# Dependencies
-# -----------------------------
-node_modules/
-
-# -----------------------------
-# Logs
-# -----------------------------
-logs/
-*.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# -----------------------------
-# Environment Variables (IMPORTANT)
-# -----------------------------
 .env
-.env.*
-!.env.example
-
- 
- 
+node_modules/
+*.log
+.DS_Store

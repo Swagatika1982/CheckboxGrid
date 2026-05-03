@@ -1,15 +1,14 @@
-import Redis from 'ioredis'
+import Redis from "ioredis";
 
+const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
+export const redis = new Redis(REDIS_URL);
+export const publisher = new Redis(REDIS_URL);
 
-function createRedisConnection() {
-    return new Redis({
-        host: 'localhost',
-        port: 6379,
-    })
-}
+export const subscribe = new Redis(REDIS_URL, {
+  enableReadyCheck: false,
+});
 
-export const redis = createRedisConnection();
-
-export const publisher = createRedisConnection();
-export const subscribe = createRedisConnection();
+redis.on("error", (err) => console.error("Redis error:", err.message));
+publisher.on("error", (err) => console.error("Redis publisher error:", err.message));
+subscribe.on("error", (err) => console.error("Redis subscriber error:", err.message));

@@ -9,12 +9,142 @@
 </head>
 
 <body>
-    <h1> CheckBoxses </h1>
+    <h1>Checkbox Grid</h1>
+    <h4>Inspired by the concept of “One Million Checkboxes</h4>
+
+    <div id="login-section">
+        <h3>Login</h3>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="login-btn">Login</button>
+    </div>
+
+    <div id="user-section" style="display: none;">
+        <p id="user-info"></p>
+        <button id="logout-btn">Logout</button>
+    </div>
+
+
+    <div id="error-message" role="alert" aria-live="assertive"
+        style="display:none; color:#fff; background:rgb(148, 47, 47); padding:0.75rem; margin-bottom:1rem; border-radius:0.35rem;">
+    </div>
+
     <div id="container"></div>
+
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();       
+        // const socket = io();
         const containerCB = document.getElementById('container');
+        const errorMessageEl = document.getElementById('error-message');
+        const loginSection = document.getElementById("login-section");
+        const userSection = document.getElementById("user-section");
+        const userInfo = document.getElementById("user-info");
+        const loginBtn = document.getElementById("login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+
+        const accessToken = localStorage.getItem("accessToken");
+
+        const socket = io({
+            auth: {
+                token: accessToken,
+            },
+        });
+
+
+        function isLoggedIn() {
+            return Boolean(localStorage.getItem("accessToken"));
+        }
+
+        function updateAuthUI() {
+            if (isLoggedIn()) {
+                loginSection.style.display = "none";
+                userSection.style.display = "block";
+                userInfo.textContent = "Logged in user";
+            } else {
+                loginSection.style.display = "block";
+                userSection.style.display = "none";
+            }
+        }
+
+        function showError(message) {
+            if (!message) {
+                errorMessageEl.textContent = '';
+                errorMessageEl.style.display = 'none';
+                return;
+            }
+
+            errorMessageEl.textContent = message;
+            errorMessageEl.style.display = 'block';
+
+            setTimeout(() => {
+                errorMessageEl.textContent = "";
+                errorMessageEl.style.display = "none";
+            }, 3000);
+
+        }
+        async function login() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!email || !password) {
+                showError("Please enter email and password.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data?.message || "Login failed.");
+                    return;
+                }
+
+                const token = data?.data?.accessToken;
+
+                if (!token) {
+                    showError("Login successful, but access token missing.");
+                    return;
+                }
+
+                localStorage.setItem("accessToken", token);
+                location.reload();
+            } catch (error) {
+                showError("Unable to login. Please check server.");
+                console.error(error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("accessToken");
+            location.reload();
+        }
+
+        loginBtn.addEventListener("click", login);
+        logoutBtn.addEventListener("click", logout);
+
+        socket.on("connect", () => {
+            console.log("Socket connected:", socket.id);
+        });
+
+        socket.on('server:error', (data) => {
+            const message = (data && data.error) || 'Unknown server error';
+            showError(message);
+        });
+
+        socket.on("server:rate-limit", (data) => {
+            const message = data?.message || "Too many clicks. Please slow down.";
+            showError(message);
+        });
+
 
         socket.on('server:checkbox:change', (data) => {
             console.log(`Socket Server Event`, data);
@@ -26,30 +156,54 @@
             }
         });
 
-        window.addEventListener('load', async () => {
-            const response = await fetch('/checkboxes', { method: 'GET' })
-            const data = await response.json()
+        async function fetchStateFRomServer() {
+            try {
 
-            if (data && data.checkboxes) {
-                data.checkboxes.forEach((severValue, index) => {
-                    const input = document.createElement('input');
+                containerCB.innerHTML = "";
 
-                    input.type = 'checkbox';
-                    input.id = `checkbox-${index}`;
-                    input.checked = severValue;
+                const response = await fetch('/checkboxes', { method: 'GET' });
+                if (!response.ok) {
+                    throw new Error(`Failed to load checkboxes: ${response.status} ${response.statusText}`);
+                }
 
-                    input.addEventListener('change', (event) => {
-                        const checked = event.target.checked;
-                        console.log(`Checkbox Changed`, { index, checked });
-                        socket.emit('client:checkbox:change', { index, checked })
+                const data = await response.json();
+                if (data?.error) {
+                    showError(data.error);
+                    return;
+                }
 
+                if (data && data.checkboxes) {
+                    data.checkboxes.forEach((severValue, index) => {
+                        const input = document.createElement('input');
+
+                        input.type = 'checkbox';
+                        input.id = `checkbox-${index}`;
+                        input.checked = severValue;
+
+                        input.addEventListener('change', (event) => {
+                            if (!isLoggedIn()) {
+                                event.target.checked = !event.target.checked;
+                                showError("Please login to update checkboxes.");
+                                return;
+                            }
+                            const checked = event.target.checked;
+                            console.log(`Checkbox Changed`, { index, checked });
+                            socket.emit('client:checkbox:change', { index, checked });
+                            // fetchStateFRomServer();
+                        });
+                        containerCB.appendChild(input);
                     });
-                    containerCB.appendChild(input);
-                })
+                }
+            } catch (error) {
+                showError(error.message || 'Unable to load checkbox data.');
+                console.error(error);
             }
-        })
 
-
+        }
+        window.addEventListener('load', async () => {
+            updateAuthUI();
+            fetchStateFRomServer();
+        });
     </script>
 </body>
 
