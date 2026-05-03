@@ -129,7 +129,17 @@ Example behavior:
 This prevents abuse without affecting normal usage.
 
 Screenshots / Demo
+1.
  <img width="1050" height="904" alt="image" src="https://github.com/user-attachments/assets/a115e4f8-42f3-4f41-b4fd-6542cee4681b" />
+ 2. Click on Checkbox not allowed for unauthorised user...
+ <img width="976" height="877" alt="image" src="https://github.com/user-attachments/assets/2a0af358-392a-4c7a-a07f-3d0a678d18a1" />
+ 3.
+<img width="934" height="726" alt="image" src="https://github.com/user-attachments/assets/473efff4-064e-438b-95fa-38f9e684bd22" />
+4. Rate limiting applied. each click waits 5 sec...
+<img width="949" height="816" alt="image" src="https://github.com/user-attachments/assets/cbf5f930-4e17-4068-b814-adde0de2c4d0" />
+
+
+
 
 
 Live Demo:
